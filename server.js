@@ -4,6 +4,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { extname, join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import {
+  getSupabaseAdi,
   listSupabaseResources,
   saveSupabaseStudentResource,
   supabaseConfigured
@@ -170,6 +171,10 @@ async function loadDotEnv() {
 }
 
 async function getAdi(zip) {
+  if (supabaseConfigured()) {
+    return getSupabaseAdi(zip);
+  }
+
   if (process.env.USE_SOCIOME_ADI === "1") {
     const live = await getSociomeAdi(zip);
     if (live.ok) return live;

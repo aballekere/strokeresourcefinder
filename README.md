@@ -151,6 +151,12 @@ USE_SOCIOME_ADI=0
 
 On Vercel, the frontend in `public/` calls serverless API routes in `api/`. Student entries are written to Supabase through `/api/resources/manual`, then included in later `/api/resources` searches for the same ZIP/category.
 
+When Supabase is configured, deployed searches do **not** show sample/mock resources. They show:
+
+- counselor-maintained trusted resources from `data/trusted-resources.json`
+- student-entered resources from Supabase `resources`
+- ADI context from Supabase `adi_context`
+
 ### 4. Local testing with Supabase
 
 Copy `.env.example` to `.env`, fill in the Supabase variables, then run:
@@ -160,6 +166,61 @@ npm start
 ```
 
 If Supabase variables are missing, local student entries fall back to SQLite at `data/resources.sqlite`.
+
+### 5. Load ADI context into Supabase
+
+Vercel does not run R, so production ADI values should be precomputed with `sociome` and stored in Supabase.
+
+The schema creates an `adi_context` table:
+
+```text
+zip
+geography
+reference_area
+year
+adi
+financial_strength
+economic_hardship_and_inequality
+educational_attainment
+source
+updated_at
+```
+
+Example SQL for one ZIP:
+
+```sql
+insert into public.adi_context (
+  zip,
+  geography,
+  reference_area,
+  year,
+  adi,
+  financial_strength,
+  economic_hardship_and_inequality,
+  educational_attainment,
+  source
+) values (
+  '44106',
+  'ZCTA',
+  'ZCTAs beginning with 441',
+  2022,
+  102.09,
+  115.92,
+  115.29,
+  105.36,
+  'sociome acs5'
+)
+on conflict (zip) do update set
+  geography = excluded.geography,
+  reference_area = excluded.reference_area,
+  year = excluded.year,
+  adi = excluded.adi,
+  financial_strength = excluded.financial_strength,
+  economic_hardship_and_inequality = excluded.economic_hardship_and_inequality,
+  educational_attainment = excluded.educational_attainment,
+  source = excluded.source,
+  updated_at = now();
+```
 
 ## Live Google Places Setup
 

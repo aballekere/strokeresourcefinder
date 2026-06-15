@@ -28,3 +28,26 @@ create policy "Server service role manages resources"
   for all
   using (auth.role() = 'service_role')
   with check (auth.role() = 'service_role');
+
+create table if not exists public.adi_context (
+  zip text primary key check (zip ~ '^[0-9]{5}$'),
+  geography text not null default 'ZCTA',
+  reference_area text,
+  year integer not null,
+  adi numeric,
+  financial_strength numeric,
+  economic_hardship_and_inequality numeric,
+  educational_attainment numeric,
+  source text not null default 'sociome',
+  updated_at timestamptz not null default now()
+);
+
+grant select, insert, update, delete on public.adi_context to service_role;
+
+alter table public.adi_context enable row level security;
+
+create policy "Server service role manages ADI context"
+  on public.adi_context
+  for all
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');

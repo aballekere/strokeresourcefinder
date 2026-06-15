@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import {
   cleanZip,
   getDemoAdi,
+  getSupabaseAdi,
   listSupabaseResources,
   matchesSelectedCategory,
   supabaseConfigured
@@ -22,10 +23,12 @@ export default async function handler(req, res) {
     .filter(Boolean);
 
   try {
-    const [trusted, mock, studentEntries] = await Promise.all([
+    const isSharedDeployment = supabaseConfigured();
+    const [trusted, mock, studentEntries, adi] = await Promise.all([
       loadJson("../data/trusted-resources.json"),
-      loadJson("../data/mock-places.json"),
-      listSupabaseResources(zip, categories)
+      isSharedDeployment ? Promise.resolve([]) : loadJson("../data/mock-places.json"),
+      listSupabaseResources(zip, categories),
+      isSharedDeployment ? getSupabaseAdi(zip) : Promise.resolve(getDemoAdi(zip))
     ]);
 
     const trustedMatches = trusted
@@ -42,10 +45,10 @@ export default async function handler(req, res) {
       zip,
       radiusMiles,
       generatedAt: new Date().toISOString(),
-      adi: getDemoAdi(zip),
+      adi,
       resources: [...trustedMatches, ...studentEntries, ...mockMatches],
-      source: supabaseConfigured()
-        ? "Trusted list + shared Supabase student entries + sample data"
+      source: isSharedDeployment
+        ? "Trusted list + shared Supabase student entries"
         : "Trusted list + sample data. Configure Supabase environment variables for shared student entries."
     });
   } catch (error) {
