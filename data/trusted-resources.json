@@ -28,5 +28,113 @@
     "website": "https://www.riderta.com/paratransit",
     "zipCodes": ["44106", "44110", "44112", "44118"],
     "notes": "Useful for patients who qualify for door-to-door transit assistance."
+  },
+  {
+    "id": "trusted-eldercare-locator",
+    "name": "Eldercare Locator",
+    "category": "Senior services",
+    "address": "Available by phone or online",
+    "phone": "1-800-677-1116",
+    "website": "https://eldercare.acl.gov",
+    "zipCodes": ["*"],
+    "notes": "National Administration for Community Living service to connect older adults and caregivers with local aging resources.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "Official ACL/Eldercare Locator website"
+  },
+  {
+    "id": "trusted-medicare",
+    "name": "Medicare",
+    "category": "Senior services",
+    "address": "Available by phone, live chat, or online",
+    "phone": "1-800-633-4227",
+    "website": "https://www.medicare.gov/talk-to-someone",
+    "zipCodes": ["*"],
+    "notes": "24/7 Medicare help line for coverage, plans, providers, and Medicare questions. TTY: 1-877-486-2048.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "Medicare.gov"
+  },
+  {
+    "id": "trusted-ship",
+    "name": "State Health Insurance Assistance Program Locator",
+    "category": "Senior services",
+    "address": "Available online",
+    "phone": "",
+    "website": "https://www.shiphelp.org",
+    "zipCodes": ["*"],
+    "notes": "Find free local Medicare counseling for plan choices, costs, Extra Help, complaints, and appeals.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "Medicare.gov referral to SHIP"
+  },
+  {
+    "id": "trusted-social-security",
+    "name": "Social Security Administration",
+    "category": "Navigation and social services",
+    "address": "Available by phone, online, or local office",
+    "phone": "1-800-772-1213",
+    "website": "https://www.ssa.gov",
+    "zipCodes": ["*"],
+    "notes": "Benefits, disability, SSI, Social Security cards, and Medicare enrollment support. TTY: 1-800-325-0778.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "Social Security Administration"
+  },
+  {
+    "id": "trusted-988-lifeline",
+    "name": "988 Suicide & Crisis Lifeline",
+    "category": "Navigation and social services",
+    "address": "Available by call, text, chat, or online",
+    "phone": "988",
+    "website": "https://988lifeline.org",
+    "zipCodes": ["*"],
+    "notes": "Free, confidential 24/7 crisis support for mental health, emotional distress, alcohol or drug concerns, or someone who needs to talk.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "988 Lifeline"
+  },
+  {
+    "id": "trusted-benefit-finder",
+    "name": "USAGov Benefit Finder",
+    "category": "Navigation and social services",
+    "address": "Available online",
+    "phone": "",
+    "website": "https://www.usa.gov/benefit-finder",
+    "zipCodes": ["*"],
+    "notes": "Federal benefit finder for disability, food, health, housing, utilities, jobs, retirement, and other assistance categories.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "USAGov"
+  },
+  {
+    "id": "trusted-ohio-benefits",
+    "name": "Ohio Benefits",
+    "category": "Navigation and social services",
+    "address": "Available online for Ohio residents",
+    "phone": "",
+    "website": "https://benefits.ohio.gov",
+    "zipCodes": ["*"],
+    "notes": "Ohio portal for applying for and managing benefits such as Medicaid, food assistance, cash assistance, and child care assistance.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "Ohio Benefits website"
+  },
+  {
+    "id": "trusted-ohio-department-aging",
+    "name": "Ohio Department of Aging",
+    "category": "Senior services",
+    "address": "Ohio statewide aging services network",
+    "phone": "",
+    "website": "https://aging.ohio.gov",
+    "zipCodes": ["*"],
+    "notes": "Statewide aging-services information and links to Area Agencies on Aging for older adults, caregivers, and adults with disabilities.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "Ohio Department of Aging website"
+  },
+  {
+    "id": "trusted-quitline",
+    "name": "Ohio Tobacco Quit Line",
+    "category": "Navigation and social services",
+    "address": "Available by phone or online",
+    "phone": "1-800-784-8669",
+    "website": "https://ohio.quitlogix.org",
+    "zipCodes": ["*"],
+    "notes": "Free tobacco cessation coaching and support; useful for stroke risk reduction outreach.",
+    "lastVerified": "2026-06-15",
+    "verifiedBy": "Ohio QuitLogix"
   }
 ]
