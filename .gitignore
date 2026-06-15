@@ -10,3 +10,4 @@ r-lib/
 # Generated local cache.
 data/resources.sqlite
 data/resources.sqlite-*
+supabase/adi_context_seed.sql

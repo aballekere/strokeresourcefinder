@@ -222,6 +222,41 @@ on conflict (zip) do update set
   updated_at = now();
 ```
 
+To generate real ADI seed SQL from the ZIPs already present in this project:
+
+1. Get a free Census API key from <https://api.census.gov/data/key_signup.html>.
+2. Set it locally:
+
+```bash
+export CENSUS_API_KEY="your-census-key"
+```
+
+3. Generate Supabase upsert SQL:
+
+```bash
+npm run adi:sql
+```
+
+That command reads ZIPs from:
+
+- `data/trusted-resources.json`
+- local SQLite `data/resources.sqlite`, if present
+- any ZIPs passed as arguments
+
+For example:
+
+```bash
+npm run adi:sql -- 44106 44118
+```
+
+The output is written to:
+
+```text
+supabase/adi_context_seed.sql
+```
+
+Review that file, then paste it into **Supabase > SQL Editor** and run it. The generated seed file is ignored by Git because it is environment/output data, not source code.
+
 ## Live Google Places Setup
 
 1. Create a Google Cloud project.

@@ -2,6 +2,11 @@ args <- commandArgs(trailingOnly = TRUE)
 zip <- if (length(args) >= 1) args[[1]] else ""
 year <- if (length(args) >= 2) as.integer(args[[2]]) else 2022
 
+local_lib <- file.path(getwd(), "r-lib")
+if (dir.exists(local_lib)) {
+  .libPaths(c(local_lib, .libPaths()))
+}
+
 json_escape <- function(x) {
   x <- gsub("\\\\", "\\\\\\\\", x)
   x <- gsub('"', '\\"', x)
