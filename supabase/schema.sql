@@ -18,6 +18,9 @@ create table if not exists public.resources (
 create index if not exists resources_zip_category_created_idx
   on public.resources (zip, category_key, created_at desc);
 
+grant usage on schema public to service_role;
+grant select, insert, update, delete on public.resources to service_role;
+
 alter table public.resources enable row level security;
 
 create policy "Server service role manages resources"
