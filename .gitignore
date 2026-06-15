@@ -1,0 +1,12 @@
+node_modules/
+.env
+.DS_Store
+npm-debug.log*
+
+# Local reference clone of ClevelandClinicQHS/sociome.
+sociome/
+r-lib/
+
+# Generated local cache.
+data/resources.sqlite
+data/resources.sqlite-*

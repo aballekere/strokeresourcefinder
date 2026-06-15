@@ -1,0 +1,42 @@
+[
+  {
+    "id": "mock-1",
+    "name": "Neighborhood Health Center",
+    "category": "Primary care clinic",
+    "address": "123 Community Ave, Cleveland, OH 44106",
+    "phone": "(216) 555-0120",
+    "website": "https://example.org/clinic",
+    "distanceMiles": 0.8,
+    "source": "Sample"
+  },
+  {
+    "id": "mock-2",
+    "name": "Community Pharmacy",
+    "category": "Pharmacy",
+    "address": "44 Wellness Rd, Cleveland, OH 44106",
+    "phone": "(216) 555-0178",
+    "website": "https://example.org/pharmacy",
+    "distanceMiles": 1.2,
+    "source": "Sample"
+  },
+  {
+    "id": "mock-3",
+    "name": "East Side Rehabilitation Services",
+    "category": "Rehabilitation",
+    "address": "880 Recovery Blvd, Cleveland, OH 44106",
+    "phone": "(216) 555-0199",
+    "website": "https://example.org/rehab",
+    "distanceMiles": 2.4,
+    "source": "Sample"
+  },
+  {
+    "id": "mock-4",
+    "name": "Senior Support Center",
+    "category": "Senior services",
+    "address": "75 Outreach St, Cleveland, OH 44106",
+    "phone": "(216) 555-0144",
+    "website": "https://example.org/senior",
+    "distanceMiles": 3.1,
+    "source": "Sample"
+  }
+]

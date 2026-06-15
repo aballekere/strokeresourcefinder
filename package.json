@@ -1,0 +1,22 @@
+{
+  "name": "stroke-resource-finder",
+  "version": "0.1.0",
+  "description": "ZIP-code resource finder for stroke program outreach brochures, enriched with ADI context.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "stroke",
+    "resources",
+    "adi",
+    "google-places",
+    "public-health"
+  ],
+  "license": "MIT"
+}

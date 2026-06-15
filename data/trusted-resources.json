@@ -1,0 +1,32 @@
+[
+  {
+    "id": "trusted-cle-foodbank",
+    "name": "Greater Cleveland Food Bank",
+    "category": "Food assistance",
+    "address": "13815 Coit Rd, Cleveland, OH 44110",
+    "phone": "(216) 738-2067",
+    "website": "https://www.greaterclevelandfoodbank.org",
+    "zipCodes": ["44110", "44106", "44108", "44112", "44118"],
+    "notes": "Call or use the website to find nearby pantry partners."
+  },
+  {
+    "id": "trusted-211",
+    "name": "United Way 2-1-1",
+    "category": "Navigation and social services",
+    "address": "Available by phone or online",
+    "phone": "211",
+    "website": "https://www.211.org",
+    "zipCodes": ["*"],
+    "notes": "A strong catch-all for housing, food, transportation, utilities, and benefits navigation."
+  },
+  {
+    "id": "trusted-rta-paratransit",
+    "name": "GCRTA Paratransit",
+    "category": "Transportation",
+    "address": "Cleveland, OH",
+    "phone": "(216) 621-9500",
+    "website": "https://www.riderta.com/paratransit",
+    "zipCodes": ["44106", "44110", "44112", "44118"],
+    "notes": "Useful for patients who qualify for door-to-door transit assistance."
+  }
+]
