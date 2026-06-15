@@ -115,8 +115,9 @@ function renderAdi(adi) {
   }
 
   const score = Number.isFinite(Number(adi.adi)) ? Number(adi.adi).toFixed(1) : "N/A";
-  adiScore.textContent = `ADI ${score}`;
-  adiDetail.textContent = `${adi.geography} ${adi.zip}, ${adi.year}. Source: ${adi.source}`;
+  adiScore.textContent = `sociome ADI score ${score}`;
+  const referenceArea = adi.referenceArea ? ` Reference area: ${adi.referenceArea}.` : "";
+  adiDetail.textContent = `${adi.geography} ${adi.zip}, ${adi.year}. Mean 100, SD 20.${referenceArea} Source: ${adi.source}`;
 }
 
 function renderResources(resources) {
