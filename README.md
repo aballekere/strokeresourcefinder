@@ -2,7 +2,7 @@
 
 Stroke Resource Finder is a small web app for stroke program counselors who need to make location-specific outreach brochures. A counselor enters a ZIP code, chooses resource categories, and gets a brochure-ready list of nearby services plus Area Deprivation Index (ADI) context.
 
-For a full adaptation checklist for another stroke program, see [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md).
+For a full adaptation checklist for another stroke program, see [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md). For technical handoff, deployment ownership, and operations, see [IT_HANDOFF.md](IT_HANDOFF.md).
 
 The app is designed to work in two main modes:
 
