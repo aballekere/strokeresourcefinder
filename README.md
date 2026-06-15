@@ -2,6 +2,8 @@
 
 Stroke Resource Finder is a small web app for stroke program counselors who need to make location-specific outreach brochures. A counselor enters a ZIP code, chooses resource categories, and gets a brochure-ready list of nearby services plus Area Deprivation Index (ADI) context.
 
+For a full adaptation checklist for another stroke program, see [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md).
+
 The app is designed to work in two main modes:
 
 - **Demo mode:** uses sample resources and a placeholder ADI estimate so students and contributors can run it immediately.
@@ -115,7 +117,8 @@ Keep the `service_role` key private. It belongs only in server-side environment 
 ```bash
 SUPABASE_URL=<your-supabase-project-url>
 SUPABASE_SERVICE_ROLE_KEY=<your-supabase-service-role-key>
-STUDENT_ACCESS_TOKEN=<choose-a-private-class-passcode>
+STUDENT_ACCESS_TOKEN=<choose-a-private-student-submit-code>
+ADMIN_ACCESS_TOKEN=<choose-a-private-coordinator-review-code>
 RESOURCE_SOURCE=free
 USE_OSM_OVERPASS=0
 USE_GOOGLE_PLACES=0
@@ -131,11 +134,15 @@ Set `STUDENT_ACCESS_TOKEN` in Vercel to require a shared class passcode before `
 
 Do not use the literal placeholder text above as the passcode. Choose a real private value and rotate it if it is accidentally shared.
 
+Set `ADMIN_ACCESS_TOKEN` in Vercel to require a coordinator passcode before the **Review submissions** tab can approve or reject student submissions.
+
 When Supabase is configured, deployed searches do **not** show sample/mock resources. They show:
 
 - counselor-maintained trusted resources from `data/trusted-resources.json`
-- student-entered resources from Supabase `resources`
+- approved student-entered resources from Supabase `resources`
 - ADI context from Supabase `adi_context`
+
+New student submissions are saved as `pending` and do not appear in search until a coordinator approves them.
 
 ### 4. Local testing with Supabase
 

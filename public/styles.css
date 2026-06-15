@@ -141,6 +141,10 @@ button.secondary {
   margin: 8px 0 18px;
 }
 
+.tab-panel[hidden] {
+  display: none;
+}
+
 .tab-button {
   min-height: 40px;
   border-color: transparent;
@@ -161,7 +165,8 @@ button.secondary {
   margin-bottom: 24px;
 }
 
-.student-resource-form {
+.student-resource-form,
+.admin-review-form {
   display: grid;
   gap: 16px;
   border: 1px solid var(--line);
@@ -196,6 +201,23 @@ button.secondary {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+}
+
+.admin-review-panel {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.review-grid {
+  margin-top: 0;
+}
+
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
 }
 
 .filter-pill {

@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { validateStudentPayload } from "../lib/supabaseResources.js";
+import {
+  validAdminAccessToken,
+  validateStudentPayload
+} from "../lib/supabaseResources.js";
 
 const validPayload = {
   accessToken: "class-code",
@@ -41,5 +44,20 @@ test("student resource websites must be http or https URLs", () => {
     assert.equal(denied.status, 400);
   } finally {
     if (previous != null) process.env.STUDENT_ACCESS_TOKEN = previous;
+  }
+});
+
+test("admin review actions require the configured admin access token", () => {
+  const previous = process.env.ADMIN_ACCESS_TOKEN;
+  process.env.ADMIN_ACCESS_TOKEN = "admin-code";
+  try {
+    assert.equal(validAdminAccessToken("admin-code"), true);
+    assert.equal(validAdminAccessToken("wrong"), false);
+  } finally {
+    if (previous == null) {
+      delete process.env.ADMIN_ACCESS_TOKEN;
+    } else {
+      process.env.ADMIN_ACCESS_TOKEN = previous;
+    }
   }
 });

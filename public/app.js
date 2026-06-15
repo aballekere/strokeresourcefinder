@@ -4,6 +4,7 @@ const radiusInput = document.querySelector("#radius");
 const filters = document.querySelector("#filters");
 const resourcesEl = document.querySelector("#resources");
 const template = document.querySelector("#resource-card-template");
+const reviewTemplate = document.querySelector("#review-card-template");
 const adiScore = document.querySelector("#adi-score");
 const adiDetail = document.querySelector("#adi-detail");
 const sourceTitle = document.querySelector("#source-title");
@@ -17,6 +18,11 @@ const studentResourceForm = document.querySelector("#student-resource-form");
 const resourceZip = document.querySelector("#resource-zip");
 const resourceCategory = document.querySelector("#resource-category");
 const studentResourceStatus = document.querySelector("#student-resource-status");
+const adminReviewForm = document.querySelector("#admin-review-form");
+const adminAccessToken = document.querySelector("#admin-access-token");
+const adminReviewedBy = document.querySelector("#admin-reviewed-by");
+const adminReviewStatus = document.querySelector("#admin-review-status");
+const pendingResourcesEl = document.querySelector("#pending-resources");
 
 let categories = [];
 let appConfig = {};
@@ -133,33 +139,66 @@ function renderResources(resources) {
     card.querySelector(".source").textContent = resource.source || "";
 
     const contact = card.querySelector(".contact");
-    if (resource.phone) {
-      const phone = document.createElement("a");
-      phone.href = `tel:${resource.phone}`;
-      phone.textContent = resource.phone;
-      contact.append(phone);
-    }
-    if (resource.website) {
-      const safeWebsite = safeHttpUrl(resource.website);
-      if (safeWebsite) {
-        const website = document.createElement("a");
-        website.href = safeWebsite;
-        website.target = "_blank";
-        website.rel = "noreferrer";
-        website.textContent = "Website";
-        contact.append(website);
-      }
-    }
-    if (resource.mapUrl) {
-      const map = document.createElement("a");
-      map.href = resource.mapUrl;
-      map.target = "_blank";
-      map.rel = "noreferrer";
-      map.textContent = "Map";
-      contact.append(map);
-    }
+    renderContactLinks(contact, resource);
 
     resourcesEl.append(card);
+  }
+}
+
+function renderPendingResources(resources) {
+  pendingResourcesEl.replaceChildren();
+  if (resources.length === 0) {
+    adminReviewStatus.textContent = "No pending submissions.";
+    return;
+  }
+
+  adminReviewStatus.textContent = `${resources.length} pending submission${resources.length === 1 ? "" : "s"}.`;
+  for (const resource of resources) {
+    const card = reviewTemplate.content.firstElementChild.cloneNode(true);
+    card.dataset.id = resource.id;
+    card.querySelector(".category").textContent = resource.category || "Resource";
+    card.querySelector(".source").textContent = resource.status || "pending";
+    card.querySelector("h3").textContent = resource.name || "Unnamed resource";
+    card.querySelector(".address").textContent = resource.address || "";
+    card.querySelector(".notes").textContent = resource.notes || "";
+    card.querySelector(".submitted-by").textContent = [
+      resource.createdBy ? `Submitted by ${resource.createdBy}` : "",
+      resource.zip ? `ZIP ${resource.zip}` : "",
+      resource.fetchedAt ? `Submitted ${new Date(resource.fetchedAt).toLocaleString()}` : ""
+    ].filter(Boolean).join(" · ");
+    renderContactLinks(card.querySelector(".contact"), resource);
+    for (const button of card.querySelectorAll("[data-review]")) {
+      button.addEventListener("click", () => reviewResource(resource.id, button.dataset.review));
+    }
+    pendingResourcesEl.append(card);
+  }
+}
+
+function renderContactLinks(contact, resource) {
+  if (resource.phone) {
+    const phone = document.createElement("a");
+    phone.href = `tel:${resource.phone}`;
+    phone.textContent = resource.phone;
+    contact.append(phone);
+  }
+  if (resource.website) {
+    const safeWebsite = safeHttpUrl(resource.website);
+    if (safeWebsite) {
+      const website = document.createElement("a");
+      website.href = safeWebsite;
+      website.target = "_blank";
+      website.rel = "noreferrer";
+      website.textContent = "Website";
+      contact.append(website);
+    }
+  }
+  if (resource.mapUrl) {
+    const map = document.createElement("a");
+    map.href = resource.mapUrl;
+    map.target = "_blank";
+    map.rel = "noreferrer";
+    map.textContent = "Map";
+    contact.append(map);
   }
 }
 
@@ -201,11 +240,50 @@ studentResourceForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  studentResourceStatus.textContent = `${result.resource.name} saved for ${result.resource.zip}.`;
+  studentResourceStatus.textContent = `${result.resource.name} submitted for review.`;
   zipInput.value = result.resource.zip;
   resourceZip.value = result.resource.zip;
   activateTab("search-panel");
   await search();
 });
+
+adminReviewForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await loadPendingResources();
+});
+
+async function loadPendingResources() {
+  adminReviewStatus.textContent = "Loading pending submissions...";
+  const params = new URLSearchParams({ adminToken: adminAccessToken.value.trim() });
+  const response = await fetch(`/api/admin/resources?${params}`);
+  const result = await response.json();
+  if (!response.ok) {
+    pendingResourcesEl.replaceChildren();
+    adminReviewStatus.textContent = result.error || "Could not load pending submissions.";
+    return;
+  }
+  renderPendingResources(result.resources || []);
+}
+
+async function reviewResource(id, status) {
+  adminReviewStatus.textContent = `${status === "approved" ? "Approving" : "Rejecting"} submission...`;
+  const response = await fetch("/api/admin/resources", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      adminToken: adminAccessToken.value.trim(),
+      reviewedBy: adminReviewedBy.value.trim(),
+      id,
+      status
+    })
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    adminReviewStatus.textContent = result.error || "Could not update submission.";
+    return;
+  }
+  await loadPendingResources();
+  if (status === "approved") await search();
+}
 
 init();

@@ -4,8 +4,11 @@ import { existsSync, mkdirSync } from "node:fs";
 import { extname, join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import {
+  adminAccessRequired,
   getSupabaseAdi,
+  listPendingSupabaseResources,
   listSupabaseResources,
+  reviewSupabaseResource,
   saveSupabaseStudentResource,
   studentAccessRequired,
   supabaseConfigured,
@@ -670,6 +673,7 @@ async function handleApi(req, res, url) {
       sqliteCacheEnabled: Boolean(database),
       supabaseEnabled: supabaseConfigured(),
       studentAccessRequired: studentAccessRequired(),
+      adminAccessRequired: adminAccessRequired(),
       cacheTtlDays
     });
     return;
@@ -728,6 +732,31 @@ async function handleApi(req, res, url) {
       sendJson(res, result.status, { ok: true, resource: result.resource });
     } catch (error) {
       sendJson(res, 400, { error: error.message || "Unable to save resource." });
+    }
+    return;
+  }
+
+  if (url.pathname === "/api/admin/resources" && req.method === "GET") {
+    const result = await listPendingSupabaseResources(url.searchParams.get("adminToken"));
+    if (!result.ok) {
+      sendJson(res, result.status, { error: result.error });
+      return;
+    }
+    sendJson(res, result.status, { ok: true, resources: result.resources });
+    return;
+  }
+
+  if (url.pathname === "/api/admin/resources" && req.method === "POST") {
+    try {
+      const body = await readRequestBody(req);
+      const result = await reviewSupabaseResource(JSON.parse(body || "{}"));
+      if (!result.ok) {
+        sendJson(res, result.status, { error: result.error });
+        return;
+      }
+      sendJson(res, result.status, { ok: true, resource: result.resource });
+    } catch (error) {
+      sendJson(res, 400, { error: error.message || "Unable to review resource." });
     }
     return;
   }

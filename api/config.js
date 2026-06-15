@@ -1,4 +1,9 @@
-import { resourceQueries, studentAccessRequired, supabaseConfigured } from "../lib/supabaseResources.js";
+import {
+  adminAccessRequired,
+  resourceQueries,
+  studentAccessRequired,
+  supabaseConfigured
+} from "../lib/supabaseResources.js";
 
 export default function handler(req, res) {
   res.status(200).json({
@@ -11,6 +16,7 @@ export default function handler(req, res) {
     sqliteCacheEnabled: false,
     supabaseEnabled: supabaseConfigured(),
     studentAccessRequired: studentAccessRequired(),
+    adminAccessRequired: adminAccessRequired(),
     cacheTtlDays: 7
   });
 }

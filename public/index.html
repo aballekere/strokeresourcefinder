@@ -37,13 +37,14 @@
       <nav class="tabs" aria-label="Workspace tabs">
         <button type="button" class="tab-button active" data-tab="search-panel">Find resources</button>
         <button type="button" class="tab-button" data-tab="student-entry-panel">Add student resource</button>
+        <button type="button" class="tab-button" data-tab="admin-review-panel">Review submissions</button>
       </nav>
 
       <section id="student-entry-panel" class="tab-panel student-entry-panel" hidden>
         <form id="student-resource-form" class="student-resource-form">
           <div class="form-head">
             <h2>Add a local resource</h2>
-            <p class="subtle">Saved entries go into the shared class database and appear in future searches for the same ZIP and category.</p>
+            <p class="subtle">Saved entries go into the shared class database for coordinator review before appearing in searches.</p>
           </div>
           <div class="entry-grid">
             <label>
@@ -91,6 +92,30 @@
         </form>
       </section>
 
+      <section id="admin-review-panel" class="tab-panel admin-review-panel" hidden>
+        <form id="admin-review-form" class="admin-review-form">
+          <div class="form-head">
+            <h2>Review student submissions</h2>
+            <p class="subtle">Approve verified resources before they appear in search results.</p>
+          </div>
+          <div class="entry-grid">
+            <label>
+              <span>Admin access code</span>
+              <input id="admin-access-token" name="adminToken" type="password" autocomplete="off" required>
+            </label>
+            <label>
+              <span>Reviewed by</span>
+              <input id="admin-reviewed-by" name="reviewedBy" placeholder="Coordinator initials">
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Load pending</button>
+            <span id="admin-review-status" class="subtle">Enter the admin code to load pending submissions.</span>
+          </div>
+        </form>
+        <section id="pending-resources" class="resource-grid review-grid" aria-live="polite"></section>
+      </section>
+
       <section id="search-panel" class="tab-panel">
       <section class="status-row">
         <div class="adi-panel">
@@ -129,6 +154,24 @@
         <div class="contact"></div>
         <p class="notes"></p>
         <span class="source"></span>
+      </article>
+    </template>
+
+    <template id="review-card-template">
+      <article class="resource-card review-card">
+        <div class="resource-top">
+          <span class="category"></span>
+          <span class="source"></span>
+        </div>
+        <h3></h3>
+        <p class="address"></p>
+        <div class="contact"></div>
+        <p class="notes"></p>
+        <p class="subtle submitted-by"></p>
+        <div class="review-actions">
+          <button type="button" data-review="approved">Approve</button>
+          <button type="button" class="secondary" data-review="rejected">Reject</button>
+        </div>
       </article>
     </template>
 

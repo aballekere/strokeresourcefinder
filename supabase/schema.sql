@@ -11,9 +11,34 @@ create table if not exists public.resources (
   website text,
   notes text,
   created_by text,
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  reviewed_by text,
+  reviewed_at timestamptz,
   source text not null default 'Student entry',
   created_at timestamptz not null default now()
 );
+
+alter table public.resources
+  add column if not exists status text not null default 'pending';
+
+alter table public.resources
+  add column if not exists reviewed_by text;
+
+alter table public.resources
+  add column if not exists reviewed_at timestamptz;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'resources_status_check'
+      and conrelid = 'public.resources'::regclass
+  ) then
+    alter table public.resources
+      add constraint resources_status_check check (status in ('pending', 'approved', 'rejected'));
+  end if;
+end $$;
 
 create index if not exists resources_zip_category_created_idx
   on public.resources (zip, category_key, created_at desc);
