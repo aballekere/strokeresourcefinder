@@ -11,14 +11,6 @@ const sourceDetail = document.querySelector("#source-detail");
 const resultsTitle = document.querySelector("#results-title");
 const resultsCount = document.querySelector("#results-count");
 const printButton = document.querySelector("#print-button");
-const freeDataStatus = document.querySelector("#free-data-status");
-const googleSettingsForm = document.querySelector("#google-settings-form");
-const googleApiKey = document.querySelector("#google-api-key");
-const googleEnabled = document.querySelector("#google-enabled");
-const sourceMode = document.querySelector("#source-mode");
-const googleSettingsStatus = document.querySelector("#google-settings-status");
-const freeSettingsForm = document.querySelector("#free-settings-form");
-const osmEnabled = document.querySelector("#osm-enabled");
 const tabs = document.querySelectorAll(".tab-button");
 const tabPanels = document.querySelectorAll(".tab-panel");
 const studentResourceForm = document.querySelector("#student-resource-form");
@@ -40,25 +32,9 @@ async function init() {
   const response = await fetch("/api/config");
   appConfig = await response.json();
   categories = appConfig.categories;
-  renderSetupStatus();
   renderFilters();
   renderResourceCategoryOptions();
   await search();
-}
-
-function renderSetupStatus() {
-  sourceMode.value = appConfig.sourceMode || "free";
-  googleEnabled.checked = Boolean(appConfig.liveGoogleEnabled);
-  osmEnabled.checked = Boolean(appConfig.liveOsmEnabled);
-  freeDataStatus.textContent = [
-    appConfig.supabaseEnabled ? "Supabase shared DB connected" : "Supabase shared DB off",
-    appConfig.sqliteCacheEnabled ? "SQLite cache ready" : "SQLite cache unavailable",
-    appConfig.liveOsmEnabled ? "OSM refresh enabled" : "OSM refresh off",
-    `cache TTL ${appConfig.cacheTtlDays || 7} days`
-  ].join(" · ");
-  googleSettingsStatus.textContent = appConfig.googleConfigured
-    ? "Google key is saved. Choose a mode and enable/disable Places as needed."
-    : "No Google key saved. Free mode will use trusted resources, cache, OSM if enabled, then sample data.";
 }
 
 function renderFilters() {
@@ -118,7 +94,7 @@ async function search() {
   renderAdi(data.adi);
   renderResources(data.resources);
   resultsTitle.textContent = `Resources near ${data.zip}`;
-  resultsCount.textContent = `${data.resources.length} listings within ${data.radiusMiles} miles or from trusted lists.`;
+  resultsCount.textContent = `${data.resources.length} listings from trusted lists or shared ZIP/category entries.`;
   sourceTitle.textContent = data.source;
   sourceDetail.textContent = `Updated ${new Date(data.generatedAt).toLocaleString()}`;
 }
@@ -163,12 +139,15 @@ function renderResources(resources) {
       contact.append(phone);
     }
     if (resource.website) {
-      const website = document.createElement("a");
-      website.href = resource.website;
-      website.target = "_blank";
-      website.rel = "noreferrer";
-      website.textContent = "Website";
-      contact.append(website);
+      const safeWebsite = safeHttpUrl(resource.website);
+      if (safeWebsite) {
+        const website = document.createElement("a");
+        website.href = safeWebsite;
+        website.target = "_blank";
+        website.rel = "noreferrer";
+        website.textContent = "Website";
+        contact.append(website);
+      }
     }
     if (resource.mapUrl) {
       const map = document.createElement("a");
@@ -183,6 +162,15 @@ function renderResources(resources) {
   }
 }
 
+function safeHttpUrl(value) {
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   search();
@@ -190,45 +178,6 @@ form.addEventListener("submit", (event) => {
 
 filters.addEventListener("change", search);
 printButton.addEventListener("click", () => window.print());
-googleSettingsForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  googleSettingsStatus.textContent = "Saving settings...";
-  const response = await fetch("/api/settings/google", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      apiKey: googleApiKey.value.trim(),
-      enabled: googleEnabled.checked,
-      sourceMode: sourceMode.value
-    })
-  });
-  const result = await response.json();
-  if (!response.ok) {
-    googleSettingsStatus.textContent = result.error || "Could not save settings.";
-    return;
-  }
-  googleApiKey.value = "";
-  appConfig = { ...appConfig, ...result };
-  renderSetupStatus();
-  await search();
-});
-freeSettingsForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  freeDataStatus.textContent = "Saving free-data settings...";
-  const response = await fetch("/api/settings/free", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ osmEnabled: osmEnabled.checked })
-  });
-  const result = await response.json();
-  if (!response.ok) {
-    freeDataStatus.textContent = result.error || "Could not save free-data settings.";
-    return;
-  }
-  appConfig = { ...appConfig, ...result };
-  renderSetupStatus();
-  await search();
-});
 
 for (const tab of tabs) {
   tab.addEventListener("click", () => activateTab(tab.dataset.tab));

@@ -7,7 +7,9 @@ import {
   getSupabaseAdi,
   listSupabaseResources,
   saveSupabaseStudentResource,
-  supabaseConfigured
+  studentAccessRequired,
+  supabaseConfigured,
+  validateStudentPayload
 } from "./lib/supabaseResources.js";
 
 const root = process.cwd();
@@ -424,24 +426,10 @@ async function saveStudentResource(payload) {
     return { ok: false, status: 503, error: "SQLite is unavailable on this Node runtime." };
   }
 
-  const zip = cleanZip(payload.zip);
-  const categoryKey = String(payload.categoryKey || "").trim();
-  const query = selectedQueryForKey(categoryKey);
-  const name = String(payload.name || "").trim();
-  const address = String(payload.address || "").trim();
-  const phone = String(payload.phone || "").trim();
-  const website = String(payload.website || "").trim();
-  const notes = String(payload.notes || "").trim();
-  const createdBy = String(payload.createdBy || "").trim();
+  const validation = validateStudentPayload(payload);
+  if (!validation.ok) return validation;
 
-  if (!zip) return { ok: false, status: 400, error: "Enter a five-digit ZIP code." };
-  if (!query) return { ok: false, status: 400, error: "Choose a valid category." };
-  if (!name) return { ok: false, status: 400, error: "Enter the resource name." };
-  if (!address) return { ok: false, status: 400, error: "Enter an address or phone/online service note." };
-  if (!phone && !website && !notes) {
-    return { ok: false, status: 400, error: "Add a phone, website, or note so counselors have a next step." };
-  }
-
+  const { zip, categoryKey, category, name, address, phone, website, notes, createdBy } = validation.resource;
   const id = `student-${zip}-${categoryKey}-${slugify(name)}-${Date.now()}`;
   const fetchedAt = new Date().toISOString();
   database.prepare(`
@@ -451,8 +439,8 @@ async function saveStudentResource(payload) {
   `).run(
     id,
     zip,
-    query.key,
-    query.label,
+    categoryKey,
+    category,
     name,
     address,
     phone,
@@ -681,6 +669,7 @@ async function handleApi(req, res, url) {
       sourceMode: process.env.RESOURCE_SOURCE || "free",
       sqliteCacheEnabled: Boolean(database),
       supabaseEnabled: supabaseConfigured(),
+      studentAccessRequired: studentAccessRequired(),
       cacheTtlDays
     });
     return;

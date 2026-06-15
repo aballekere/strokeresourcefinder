@@ -87,13 +87,13 @@ Get app configuration:
 GET /api/config
 ```
 
-Save local Google settings:
+Save local Google settings. This endpoint is for local development only; deployed Vercel settings should be managed with environment variables:
 
 ```text
 POST /api/settings/google
 ```
 
-Save free-data settings:
+Save free-data settings. This endpoint is for local development only:
 
 ```text
 POST /api/settings/free
@@ -140,6 +140,7 @@ Keep the `service_role` key private. It belongs only in server-side environment 
 ```bash
 SUPABASE_URL=your-supabase-project-url
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+STUDENT_ACCESS_TOKEN=choose-a-class-passcode
 RESOURCE_SOURCE=free
 USE_OSM_OVERPASS=0
 USE_GOOGLE_PLACES=0
@@ -150,6 +151,8 @@ USE_SOCIOME_ADI=0
 4. Give students the Vercel URL, not local `localhost`.
 
 On Vercel, the frontend in `public/` calls serverless API routes in `api/`. Student entries are written to Supabase through `/api/resources/manual`, then included in later `/api/resources` searches for the same ZIP/category.
+
+Set `STUDENT_ACCESS_TOKEN` in Vercel to require a shared class passcode before `/api/resources/manual` accepts a write. Do not publish this passcode in GitHub.
 
 When Supabase is configured, deployed searches do **not** show sample/mock resources. They show:
 
@@ -165,7 +168,7 @@ Copy `.env.example` to `.env`, fill in the Supabase variables, then run:
 npm start
 ```
 
-If Supabase variables are missing, local student entries fall back to SQLite at `data/resources.sqlite`.
+If Supabase variables are missing, local student entries fall back to SQLite at `data/resources.sqlite`. This fallback is for local development only; do not rely on SQLite for Vercel persistence.
 
 ### 5. Load ADI context into Supabase
 
@@ -280,13 +283,7 @@ npm start
 
 The key must stay on the server. Do not put it in frontend JavaScript.
 
-The app includes a **Data source setup** panel where a local admin can paste a Google key, enable/disable Google Places, and choose:
-
-- `free`: trusted list + SQLite cache + optional OpenStreetMap refresh
-- `auto`: free path first, Google fallback when configured
-- `google`: Google Places only
-
-The API key is saved to `.env` and is never returned to the browser by `/api/config`.
+Google settings should be managed through server-side environment variables. Do not collect Google API keys in the public browser UI.
 
 Google Places content has attribution and caching rules. In production, include Google Maps attribution wherever Google-derived listings are displayed, and store only what the Google Maps Platform terms allow. The stable `place_id` can be stored and refreshed.
 

@@ -43,9 +43,13 @@
         <form id="student-resource-form" class="student-resource-form">
           <div class="form-head">
             <h2>Add a local resource</h2>
-            <p class="subtle">Saved entries go into SQLite and appear in future searches for the same ZIP and category.</p>
+            <p class="subtle">Saved entries go into the shared class database and appear in future searches for the same ZIP and category.</p>
           </div>
           <div class="entry-grid">
+            <label>
+              <span>Class access code</span>
+              <input id="resource-access-token" name="accessToken" type="password" autocomplete="off">
+            </label>
             <label>
               <span>ZIP code</span>
               <input id="resource-zip" name="zip" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" value="44106" required>
@@ -88,43 +92,6 @@
       </section>
 
       <section id="search-panel" class="tab-panel">
-      <details class="setup-panel">
-        <summary>Data source setup</summary>
-        <div class="setup-grid">
-          <form id="free-settings-form" class="free-settings">
-            <span class="eyebrow">Free data path</span>
-            <p id="free-data-status">Checking local cache and OpenStreetMap settings.</p>
-            <label class="toggle-row">
-              <input id="osm-enabled" name="osmEnabled" type="checkbox">
-              <span>Enable OpenStreetMap refresh</span>
-            </label>
-            <button type="submit" class="secondary">Save free-data settings</button>
-            <p class="subtle">Use modestly; public OSM services are community-funded and cached locally.</p>
-          </form>
-          <form id="google-settings-form" class="google-settings">
-            <span class="eyebrow">Google fallback</span>
-            <label>
-              <span>Google API key</span>
-              <input id="google-api-key" name="apiKey" type="password" autocomplete="off" placeholder="Paste key to save locally">
-            </label>
-            <label>
-              <span>Resource mode</span>
-              <select id="source-mode" name="sourceMode">
-                <option value="free">Free first</option>
-                <option value="auto">Free + Google fallback</option>
-                <option value="google">Google only</option>
-              </select>
-            </label>
-            <label class="toggle-row">
-              <input id="google-enabled" name="enabled" type="checkbox">
-              <span>Enable Google Places</span>
-            </label>
-            <button type="submit" class="secondary">Save Google settings</button>
-            <p id="google-settings-status" class="subtle">Google key stays on this server.</p>
-          </form>
-        </div>
-      </details>
-
       <section class="status-row">
         <div class="adi-panel">
           <span class="eyebrow">Area context</span>
