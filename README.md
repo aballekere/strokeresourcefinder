@@ -2,13 +2,12 @@
 
 Stroke Resource Finder is a small web app for stroke program counselors who need to make location-specific outreach brochures. A counselor enters a ZIP code, chooses resource categories, and gets a brochure-ready list of nearby services plus Area Deprivation Index (ADI) context.
 
-The app is designed to work in several modes:
+The app is designed to work in two main modes:
 
 - **Demo mode:** uses sample resources and a placeholder ADI estimate so students and contributors can run it immediately.
-- **Free-first mode:** uses counselor-approved resources, a local SQLite cache, and optional OpenStreetMap refresh.
-- **Shared classroom mode:** writes student-entered resources to Supabase so everyone contributes to one database.
-- **Google fallback mode:** uses Google Places only when configured, preferably as a fallback for missing or weak free results.
-- **Live ADI mode:** can call the R `sociome` package for ZIP/ZCTA-level ADI output.
+- **Shared classroom mode:** deploys on Vercel, writes student-entered resources to Supabase, and reads precomputed `sociome` ADI context from Supabase.
+
+Local development also supports SQLite fallback and optional live data experiments, but production should use Supabase for persistence.
 
 ## Why This Exists
 
@@ -18,10 +17,9 @@ Stroke outreach teams often table at community events and need resource lists ta
 
 - Node.js server with no required runtime dependencies
 - Browser-based frontend in `public/`
-- Local SQLite cache at `data/resources.sqlite`
-- Optional Supabase Postgres database for shared student entries
-- Optional OpenStreetMap/Nominatim/Overpass refresh for free place data
-- Optional Google Places API for live place results
+- Supabase Postgres database for shared student entries and ADI context
+- Optional local SQLite cache at `data/resources.sqlite` for development only
+- Optional local Google/OSM experiments through server-side environment variables
 - Optional R bridge to [`ClevelandClinicQHS/sociome`](https://github.com/ClevelandClinicQHS/sociome) for ADI
 - Local trusted-resource list in `data/trusted-resources.json`
 
@@ -36,36 +34,13 @@ npm start
 
 Open [http://localhost:3000](http://localhost:3000).
 
-The app works without API keys. It will show sample resources and clearly label them as sample data.
+The app works locally without API keys. It will show sample resources and clearly label them as sample data.
 
-## Data Source Modes
+## Public Deployment
+
+For a student-facing deployment, use Vercel + Supabase. Do not rely on SQLite in Vercel; serverless file storage is ephemeral and can disappear when functions idle, scale, or redeploy.
 
 For the detailed verification-first data plan, see [DATA_STRATEGY.md](DATA_STRATEGY.md).
-
-The default is **free-first** mode:
-
-```bash
-RESOURCE_SOURCE=free
-USE_OSM_OVERPASS=0
-```
-
-This uses:
-
-- `data/trusted-resources.json`
-- local SQLite cache at `data/resources.sqlite`
-- sample data if no live/cache data exists
-
-To enable free OpenStreetMap refreshes:
-
-```bash
-USE_OSM_OVERPASS=1
-CACHE_TTL_DAYS=7
-APP_USER_AGENT="StrokeResourceFinder/0.1 (+https://your-contact-page.example)"
-```
-
-OpenStreetMap public services are community-funded. Keep usage modest, cache results, use a real app/contact User-Agent, and provide attribution in production materials. The OSM fallback is intentionally restricted to physical infrastructure categories and filters out records without a street address.
-
-The **Data source setup** panel in the app can switch OpenStreetMap refresh on/off and save that setting into `.env`.
 
 ## Public API Endpoints
 
@@ -87,13 +62,13 @@ Get app configuration:
 GET /api/config
 ```
 
-Save local Google settings. This endpoint is for local development only; deployed Vercel settings should be managed with environment variables:
+Local Google settings endpoint. This is for local development only; deployed Vercel settings should be managed with environment variables:
 
 ```text
 POST /api/settings/google
 ```
 
-Save free-data settings. This endpoint is for local development only:
+Local free-data settings endpoint. This is for local development only:
 
 ```text
 POST /api/settings/free
@@ -113,10 +88,10 @@ Use this path when students should all add resources to the same database.
 
 ### 1. Create the GitHub repo
 
-Push this project to GitHub, for example:
+Push this project to GitHub:
 
 ```bash
-git remote add origin https://github.com/aballekere/strokeresourcefinder.git
+git remote add origin <your-github-repo-url>
 git push -u origin main
 ```
 
@@ -138,9 +113,9 @@ Keep the `service_role` key private. It belongs only in server-side environment 
 2. Add these environment variables:
 
 ```bash
-SUPABASE_URL=your-supabase-project-url
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-STUDENT_ACCESS_TOKEN=choose-a-class-passcode
+SUPABASE_URL=<your-supabase-project-url>
+SUPABASE_SERVICE_ROLE_KEY=<your-supabase-service-role-key>
+STUDENT_ACCESS_TOKEN=<choose-a-private-class-passcode>
 RESOURCE_SOURCE=free
 USE_OSM_OVERPASS=0
 USE_GOOGLE_PLACES=0
@@ -153,6 +128,8 @@ USE_SOCIOME_ADI=0
 On Vercel, the frontend in `public/` calls serverless API routes in `api/`. Student entries are written to Supabase through `/api/resources/manual`, then included in later `/api/resources` searches for the same ZIP/category.
 
 Set `STUDENT_ACCESS_TOKEN` in Vercel to require a shared class passcode before `/api/resources/manual` accepts a write. Do not publish this passcode in GitHub.
+
+Do not use the literal placeholder text above as the passcode. Choose a real private value and rotate it if it is accidentally shared.
 
 When Supabase is configured, deployed searches do **not** show sample/mock resources. They show:
 
@@ -266,7 +243,7 @@ supabase/adi_context_seed.sql
 
 Review that file, then paste it into **Supabase > SQL Editor** and run it. The generated seed file is ignored by Git because it is environment/output data, not source code.
 
-## Live Google Places Setup
+## Optional Local Google Places Setup
 
 1. Create a Google Cloud project.
 2. Enable **Places API (New)** and **Geocoding API**.
@@ -283,7 +260,7 @@ npm start
 
 The key must stay on the server. Do not put it in frontend JavaScript.
 
-Google settings should be managed through server-side environment variables. Do not collect Google API keys in the public browser UI.
+Google settings should be managed through server-side environment variables. Do not collect Google API keys in the public browser UI or store them in localStorage.
 
 Google Places content has attribution and caching rules. In production, include Google Maps attribution wherever Google-derived listings are displayed, and store only what the Google Maps Platform terms allow. The stable `place_id` can be stored and refreshed.
 
@@ -346,6 +323,17 @@ Example:
 ```
 
 The local `sociome/` clone is ignored by `.gitignore`; it is a reference dependency, not part of this app.
+
+## Public Repo Safety
+
+This repository intentionally excludes:
+
+- `.env`
+- `data/resources.sqlite`
+- generated ADI seed SQL
+- local R libraries and local `sociome/` clones
+
+Keep Supabase service keys, Census API keys, Google API keys, and student access passcodes in Vercel or local `.env` only.
 
 ## Ideas for High School Student Testing
 

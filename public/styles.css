@@ -198,50 +198,6 @@ button.secondary {
   gap: 10px;
 }
 
-.setup-panel {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--paper);
-  margin: 8px 0 18px;
-}
-
-.setup-panel summary {
-  cursor: pointer;
-  padding: 14px 16px;
-  font-weight: 800;
-}
-
-.setup-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
-  gap: 18px;
-  border-top: 1px solid var(--line);
-  padding: 16px;
-}
-
-.google-settings,
-.free-settings {
-  display: grid;
-  gap: 10px;
-}
-
-.google-settings input[type="password"],
-.google-settings select {
-  width: 100%;
-}
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ink);
-}
-
-.toggle-row input {
-  width: auto;
-  min-height: auto;
-}
-
 .filter-pill {
   display: inline-flex;
   align-items: center;
