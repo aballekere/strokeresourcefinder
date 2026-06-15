@@ -249,6 +249,12 @@ For example:
 npm run adi:sql -- 44106 44118
 ```
 
+Or use the included Cleveland/Cuyahoga ZIP list:
+
+```bash
+npm run adi:sql -- --file data/cleveland-cuyahoga-zips.txt
+```
+
 The output is written to:
 
 ```text

@@ -36,11 +36,24 @@ if (failures.length > 0) {
 }
 
 async function collectZips() {
-  const fromArgs = process.argv.slice(2).flatMap(extractZips);
+  const args = process.argv.slice(2);
+  const fileArgs = args.flatMap((arg, index) => {
+    if (arg === "--file" || arg === "-f") return args[index + 1] ? [args[index + 1]] : [];
+    if (arg.startsWith("--file=")) return [arg.slice("--file=".length)];
+    return [];
+  });
+  const fromFiles = (await Promise.all(fileArgs.map(readZipFile))).flat();
+  const fromArgs = args
+    .filter((arg, index) => {
+      if (arg === "--file" || arg === "-f") return false;
+      if (args[index - 1] === "--file" || args[index - 1] === "-f") return false;
+      return !arg.startsWith("--file=");
+    })
+    .flatMap(extractZips);
   const trusted = await readJson("data/trusted-resources.json");
   const fromTrusted = trusted.flatMap((resource) => resource.zipCodes || []).flatMap(extractZips);
   const fromSqlite = await readSqliteZips();
-  return [...new Set([...fromArgs, ...fromTrusted, ...fromSqlite])].sort();
+  return [...new Set([...fromArgs, ...fromFiles, ...fromTrusted, ...fromSqlite])].sort();
 }
 
 function extractZips(value) {
@@ -49,6 +62,11 @@ function extractZips(value) {
 
 async function readJson(path) {
   return JSON.parse(await readFile(join(root, path), "utf8"));
+}
+
+async function readZipFile(path) {
+  const body = await readFile(join(root, path), "utf8");
+  return extractZips(body);
 }
 
 async function readSqliteZips() {
@@ -156,5 +174,6 @@ function sqlString(value) {
 }
 
 function sqlNumber(value) {
+  if (value == null || value === "") return "null";
   return Number.isFinite(Number(value)) ? String(Number(value)) : "null";
 }
