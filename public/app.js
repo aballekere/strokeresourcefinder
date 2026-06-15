@@ -51,6 +51,7 @@ function renderSetupStatus() {
   googleEnabled.checked = Boolean(appConfig.liveGoogleEnabled);
   osmEnabled.checked = Boolean(appConfig.liveOsmEnabled);
   freeDataStatus.textContent = [
+    appConfig.supabaseEnabled ? "Supabase shared DB connected" : "Supabase shared DB off",
     appConfig.sqliteCacheEnabled ? "SQLite cache ready" : "SQLite cache unavailable",
     appConfig.liveOsmEnabled ? "OSM refresh enabled" : "OSM refresh off",
     `cache TTL ${appConfig.cacheTtlDays || 7} days`

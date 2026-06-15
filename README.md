@@ -6,6 +6,7 @@ The app is designed to work in several modes:
 
 - **Demo mode:** uses sample resources and a placeholder ADI estimate so students and contributors can run it immediately.
 - **Free-first mode:** uses counselor-approved resources, a local SQLite cache, and optional OpenStreetMap refresh.
+- **Shared classroom mode:** writes student-entered resources to Supabase so everyone contributes to one database.
 - **Google fallback mode:** uses Google Places only when configured, preferably as a fallback for missing or weak free results.
 - **Live ADI mode:** can call the R `sociome` package for ZIP/ZCTA-level ADI output.
 
@@ -18,6 +19,7 @@ Stroke outreach teams often table at community events and need resource lists ta
 - Node.js server with no required runtime dependencies
 - Browser-based frontend in `public/`
 - Local SQLite cache at `data/resources.sqlite`
+- Optional Supabase Postgres database for shared student entries
 - Optional OpenStreetMap/Nominatim/Overpass refresh for free place data
 - Optional Google Places API for live place results
 - Optional R bridge to [`ClevelandClinicQHS/sociome`](https://github.com/ClevelandClinicQHS/sociome) for ADI
@@ -97,7 +99,67 @@ Save free-data settings:
 POST /api/settings/free
 ```
 
+Save a student-found resource:
+
+```text
+POST /api/resources/manual
+```
+
 These endpoints are intentionally simple so the app can be used by another website, a brochure generator, or a future mobile workflow.
+
+## Shared Supabase + Vercel Setup
+
+Use this path when students should all add resources to the same database.
+
+### 1. Create the GitHub repo
+
+Push this project to GitHub, for example:
+
+```bash
+git remote add origin https://github.com/aballekere/strokeresourcefinder.git
+git push -u origin main
+```
+
+### 2. Create the Supabase table
+
+1. Create a Supabase project.
+2. Open **SQL Editor**.
+3. Run the SQL in [`supabase/schema.sql`](supabase/schema.sql).
+4. Go to **Project Settings > API**.
+5. Copy:
+   - Project URL
+   - `service_role` key
+
+Keep the `service_role` key private. It belongs only in server-side environment variables.
+
+### 3. Deploy on Vercel
+
+1. Import the GitHub repo into Vercel.
+2. Add these environment variables:
+
+```bash
+SUPABASE_URL=your-supabase-project-url
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+RESOURCE_SOURCE=free
+USE_OSM_OVERPASS=0
+USE_GOOGLE_PLACES=0
+USE_SOCIOME_ADI=0
+```
+
+3. Deploy.
+4. Give students the Vercel URL, not local `localhost`.
+
+On Vercel, the frontend in `public/` calls serverless API routes in `api/`. Student entries are written to Supabase through `/api/resources/manual`, then included in later `/api/resources` searches for the same ZIP/category.
+
+### 4. Local testing with Supabase
+
+Copy `.env.example` to `.env`, fill in the Supabase variables, then run:
+
+```bash
+npm start
+```
+
+If Supabase variables are missing, local student entries fall back to SQLite at `data/resources.sqlite`.
 
 ## Live Google Places Setup
 

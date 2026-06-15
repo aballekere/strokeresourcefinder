@@ -3,6 +3,11 @@ import { readFile, writeFile } from "node:fs/promises";
 import { existsSync, mkdirSync } from "node:fs";
 import { extname, join, resolve } from "node:path";
 import { spawn } from "node:child_process";
+import {
+  listSupabaseResources,
+  saveSupabaseStudentResource,
+  supabaseConfigured
+} from "./lib/supabaseResources.js";
 
 const root = process.cwd();
 const publicDir = join(root, "public");
@@ -260,15 +265,19 @@ async function getResources({ zip, categories, radiusMiles }) {
   const liveGoogle = process.env.USE_GOOGLE_PLACES === "1" && process.env.GOOGLE_MAPS_API_KEY;
   const liveOsm = process.env.USE_OSM_OVERPASS === "1";
   const selectedQueries = resourceQueries.filter((query) => categories.length === 0 || categories.includes(query.key));
+  const sharedEntries = sourceMode !== "google"
+    ? await listSupabaseResources(zip, categories)
+    : [];
 
   if (sourceMode !== "google") {
     const cached = await getCachedPlaces(zip, selectedQueries, radiusMiles);
     const studentEntries = cached.filter((resource) => resource.source === "Student entry");
+    const allStudentEntries = [...sharedEntries, ...studentEntries];
     const refreshableCache = cached.filter((resource) => resource.source !== "Student entry");
     if (refreshableCache.length > 0 && !shouldRefreshCache(refreshableCache)) {
       return {
-        resources: [...trustedMatches, ...studentEntries, ...refreshableCache],
-        source: studentEntries.length > 0
+        resources: [...trustedMatches, ...allStudentEntries, ...refreshableCache],
+        source: allStudentEntries.length > 0
           ? "Trusted list + student entries + local SQLite cache"
           : "Trusted list + local SQLite cache"
       };
@@ -280,15 +289,15 @@ async function getResources({ zip, categories, radiusMiles }) {
         const osmPlaces = await searchOpenStreetMap(zip, selectedQueries, center, radiusMiles);
         await cachePlaces(zip, osmPlaces);
         return {
-          resources: [...trustedMatches, ...studentEntries, ...osmPlaces],
-          source: studentEntries.length > 0
+          resources: [...trustedMatches, ...allStudentEntries, ...osmPlaces],
+          source: allStudentEntries.length > 0
             ? "Trusted list + student entries + OpenStreetMap refresh"
             : "Trusted list + OpenStreetMap refresh"
         };
       } catch (error) {
-        if (refreshableCache.length > 0 || studentEntries.length > 0) {
+        if (refreshableCache.length > 0 || allStudentEntries.length > 0) {
           return {
-            resources: [...trustedMatches, ...studentEntries, ...refreshableCache],
+            resources: [...trustedMatches, ...allStudentEntries, ...refreshableCache],
             source: `Trusted list + local SQLite cache; OSM refresh failed: ${error.message}`
           };
         }
@@ -299,8 +308,8 @@ async function getResources({ zip, categories, radiusMiles }) {
       const mock = await loadJson("data/mock-places.json");
       const mockMatches = mock.filter((resource) => matchesSelectedCategory(resource, categories));
       return {
-        resources: [...trustedMatches, ...studentEntries, ...mockMatches],
-        source: studentEntries.length > 0
+        resources: [...trustedMatches, ...allStudentEntries, ...mockMatches],
+        source: allStudentEntries.length > 0
           ? "Trusted list + student entries + sample data. Enable OSM refresh or Google fallback for live results."
           : "Trusted list + sample data. Enable OSM refresh or Google fallback for live results."
       };
@@ -402,6 +411,10 @@ async function cachePlaces(zip, places) {
 }
 
 async function saveStudentResource(payload) {
+  if (supabaseConfigured()) {
+    return saveSupabaseStudentResource(payload);
+  }
+
   if (!database) {
     return { ok: false, status: 503, error: "SQLite is unavailable on this Node runtime." };
   }
@@ -662,6 +675,7 @@ async function handleApi(req, res, url) {
       liveAdiEnabled: process.env.USE_SOCIOME_ADI === "1",
       sourceMode: process.env.RESOURCE_SOURCE || "free",
       sqliteCacheEnabled: Boolean(database),
+      supabaseEnabled: supabaseConfigured(),
       cacheTtlDays
     });
     return;
